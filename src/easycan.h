@@ -145,6 +145,9 @@ class EasyCan : public internal::EasyCanIface {
     can_.onTransmit(internal::TxHandler);
     return true;
   }
+  /* Enables using the alternate pins */
+  void SetRx(FLEXCAN_PINS pin = DEF) {can_.setRx(pin);};
+  void SetTx(FLEXCAN_PINS pin = DEF) {can_.setTx(pin);};
   /* Rejects all messages */
   void FilterRejectAll() {can_.setFIFOFilter(REJECT_ALL);}
   /* Accept all messages */

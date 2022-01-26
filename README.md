@@ -92,6 +92,24 @@ bfs::EasyCan<CAN0, 128, 128> can0;
 can0.Begin(1000000);
 ```
 
+**void SetRx(FLEXCAN_PINS pin)** Enables using the alternate RX pin for the CAN bus.
+
+```C++
+/* Use the alternate RX pin */
+can0.SetRx(ALT);
+/* Use the default RX pin */
+can0.SetRx(DEF);
+```
+
+**void SetTx(FLEXCAN_PINS pin)** Enables using the alternate TX pin for the CAN bus.
+
+```C++
+/* Use the alternate TX pin */
+can0.SetTx(ALT);
+/* Use the default TX pin */
+can0.SetTx(DEF);
+```
+
 ## Filtering
 After initialization, by default the object will begin receiving all messages on the bus. Filters can be configured to only receive selected messages. Up to 32 filters can be defined.
 

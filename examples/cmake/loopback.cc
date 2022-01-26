@@ -47,7 +47,7 @@ int main() {
   // can1.SetFilter(1, 2, STD);
   // can1.SetFilter(2, 3, STD);
   // can1.SetFilter(3, 4, STD);
-  bool status = can1.SetFilter(0, 0x0000, 0x0007, STD);
+  // bool status = can1.SetFilter(0, 0x0000, 0x0007, STD);
   // Serial.println(status);
   // can1.SetFilter(0, 2, EXT);
   // can1.SetFilter(0, 3, EXT);
