@@ -11,7 +11,7 @@ if (DEFINED MCU)
   set(CMAKE_TOOLCHAIN_FILE "${mcu_support_SOURCE_DIR}/cmake/cortex.cmake")
   # Project information
   project(EasyCan
-    VERSION 1.0.0
+    VERSION 1.0.1
     DESCRIPTION "Easy to use CAN driver"
     LANGUAGES CXX
   )
@@ -36,7 +36,7 @@ if (DEFINED MCU)
   FetchContent_Declare(
     circle_buf
     GIT_REPOSITORY https://github.com/bolderflight/circle_buf.git
-    GIT_TAG v4.0.2
+    GIT_TAG v4.0.3
   )
   FetchContent_MakeAvailable(circle_buf)
   # Add the library target

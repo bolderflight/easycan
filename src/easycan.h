@@ -273,6 +273,10 @@ class EasyCan : public internal::EasyCanIface {
   std::size_t Read(CanMsg * const data, const std::size_t len) {
     return rx_buf_.Read(data, len);
   }
+  /* Copy one packet out of RX buffer */
+  optional<CanMsg> Read() {
+    return rx_buf_.Read();
+  }
 
  protected:
   /* On receive interrupt handler */

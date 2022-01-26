@@ -80,11 +80,13 @@ int main() {
   Serial.print(msg_avail);
   Serial.println(" messages:");
   while (can1.available()) {
-    can1.Read(&msg, 1);
-    Serial.print("ID & Timestamp:\t");
-    Serial.print(msg.id);
-    Serial.print("\t");
-    Serial.println((uint32_t)msg.timestamp_us);
+    bfs::optional<bfs::CanMsg> ret = can1.Read();
+    if (ret) {
+      Serial.print("ID & Timestamp:\t");
+      Serial.print(ret.value().id);
+      Serial.print("\t");
+      Serial.println((uint32_t)ret.value().timestamp_us);
+    }
   }
 }
 
