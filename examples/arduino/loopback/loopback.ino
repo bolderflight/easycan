@@ -36,7 +36,7 @@ bfs::EasyCan<CAN1, 32, 32> can1;
 /* A CanMsg to send */
 bfs::CanMsg msg;
 
-int main() {
+void setup() {
   /* Start serial for feedback */
   Serial.begin(115200);
   while (!Serial) {}
@@ -88,3 +88,4 @@ int main() {
   }
 }
 
+void loop() {}

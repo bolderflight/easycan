@@ -205,7 +205,7 @@ class EasyCan : public internal::EasyCanIface {
       /* Block until we can transmit or timeout */
       if (blocking) {
         elapsed_us_ = 0;
-        while (elapsed_us_ < timeout_duration_us) {
+        while (elapsed_us_ < static_cast<uint32_t>(timeout_duration_us)) {
           if (tx_ready()) {
             can_.write(static_cast<FLEXCAN_MAILBOX>(TX_MB_NUM_),
                        ConvertMessage(msg));
@@ -224,7 +224,7 @@ class EasyCan : public internal::EasyCanIface {
         } else {
           temp_msg_ = msg;
           /* Store the timeout in the timestamp field */
-          temp_msg_.timestamp_us = micros64() + timeout_duration_us;
+          temp_msg_.timestamp_us = internal::micros64() + timeout_duration_us;
           return tx_buf_.Write(temp_msg_);
         }
       }
@@ -292,7 +292,8 @@ class EasyCan : public internal::EasyCanIface {
       if (temp_msg_.timestamp_us < 0) {
         can_.write(static_cast<FLEXCAN_MAILBOX>(TX_MB_NUM_),
                    ConvertMessage(temp_msg_));
-      } else if (micros64() < temp_msg_.timestamp_us) {
+      } else if (internal::micros64() <
+                 static_cast<uint64_t>(temp_msg_.timestamp_us)) {
         can_.write(static_cast<FLEXCAN_MAILBOX>(TX_MB_NUM_),
                    ConvertMessage(temp_msg_));
       } else {
@@ -323,7 +324,7 @@ class EasyCan : public internal::EasyCanIface {
   /* Convert from CAN_message_t to CanMsg */
   CanMsg ConvertMessage(const CAN_message_t &msg) {
     CanMsg ret;
-    ret.timestamp_us = micros64();
+    ret.timestamp_us = internal::micros64();
     ret.id = msg.id;
     ret.flags.extended = msg.flags.extended;
     ret.flags.remote = msg.flags.remote;
