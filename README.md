@@ -1,92 +1,180 @@
-# easycan
+[![Pipeline](https://gitlab.com/bolderflight/software/easycan/badges/main/pipeline.svg)](https://gitlab.com/bolderflight/software/easycan/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-An easy to use CAN driver for Teensy 3.x and 4.x
+![Bolder Flight Systems Logo](img/logo-words_75.png) &nbsp; &nbsp; ![Arduino Logo](img/arduino_logo_75.png)
 
-## Getting started
+# EasyCan
+An easy to use, timing-deterministic CAN library for Teensy 3.x and 4.x. Supports Arduino and CMake build systems.
+   * [License](LICENSE.md)
+   * [Changelog](CHANGELOG.md)
+   * [Contributing guide](CONTRIBUTING.md)
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+# Description
+The goal for EasyCan was to develop a Teensy 3.x and 4.x CAN driver that:
+   * Has a simple API
+   * Sends and receives messages sequentially
+   * Supports interrupt driven reception of messages with integrated FIFO buffering
+   * Timestamps received messages with the system monotonic time since boot (i.e. micros())
+   * Has strong timeout support and blocking / non-blocking options for writing messages
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+EasyCan is a wrapper around [FlexCAN_T4](https://github.com/tonton81/FlexCAN_T4), which meets these goals and supports CAN2.0 mode.
 
-## Add your files
+# Installation
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+## Arduino
+Simply clone or download and extract the zipped library into your Arduino/libraries folder. In addition to this library, the [Bolder Flight Systems Circular Buffer library](https://github.com/bolderflight/circle_buf) and [FlexCAN_T4 library](https://github.com/tonton81/FlexCAN_T4) must also be installed. The FlexCAN_T4 library is also available from [our mirror](https://github.com/bolderflight/flexcan). The library is added as:
+
+```C++
+#include "easycan.h"
+```
+
+A loopback example using the dual CAN buses on Teensy 3.6 is located in *examples/arduino/loopback/loopback.ino*. This library has been tested with Teensy 3.x and 4.x devices and is expected to work correctly with those.
+
+## CMake
+CMake can be used to build this library, which is exported as a library target called *easycan*. The header is added as:
+
+```C++
+#include "easycan.h"
+```
+
+The library can be also be compiled stand-alone using the CMake idiom of creating a *build* directory and then, from within that directory issuing:
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/bolderflight/software/easycan.git
-git branch -M main
-git push -uf origin main
+cmake .. -DMCU=MK66FX1M0
+make
 ```
 
-## Integrate with your tools
+This will build the library and an example executables called *loopback_example*. The example executable source file is located at *examples/cmake/loopback.cc*. Notice that the *cmake* command includes a define specifying the microcontroller the code is being compiled for. This is required to correctly configure the code, CPU frequency, and compile/linker options. The available MCUs are:
+   * MK20DX128
+   * MK20DX256
+   * MK64FX512
+   * MK66FX1M0
+   * MKL26Z64
+   * IMXRT1062_T40
+   * IMXRT1062_T41
 
-- [ ] [Set up project integrations](https://gitlab.com/bolderflight/software/easycan/-/settings/integrations)
+These are known to work with the same packages used in Teensy products. Also switching packages is known to work well, as long as it's only a package change.
 
-## Collaborate with your team
+The *loopback_example* target creates an executable for testing the library using the dual CAN buses on Teensy 3.6. This target also has a *_hex* for creating the hex file and an *_upload* for using the [Teensy CLI Uploader](https://www.pjrc.com/teensy/loader_cli.html) to flash the Teensy. Please note that the CMake build tooling is expected to be run under Linux or WSL, instructions for setting up your build environment can be found in our [build-tools repo](https://github.com/bolderflight/build-tools). 
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+# Namespace
+This library is within the namespace *bfs*.
 
-## Test and Deploy
+# CanMsg
+CAN messages are defined in a structure as:
 
-Use the built-in continuous integration in GitLab.
+| Type | Parameter | Description |
+| --- | --- | --- |
+| uint32_t |id | 11 or 29 bit ID |
+| bool  |flags.extended | Specify whether 11 or 29 bit ID, false for standard 11 bit IDs and true for extended 29 bit IDs |
+| bool  |flags.remote | Specify whether RTR frame, false for normal frame and true for remote frame |
+| bool  |flags.overrun | Was there an overrun? false for no overruns detected, true if buffer overrun |
+| uint8_t |len | Number of data bytes in the frame (0 - 8) |
+| int64_t |timestamp_us | System monotonic time since boot when the message was received, us |
+| uint8_t | buf[8] | Data bytes for the frame |
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+# EasyCan
 
-***
+## Methods
 
-# Editing this README
+**EasyCan<CAN_DEV_TABLE BUS, std::size_t RX_BUF, std::size_t TX_BUF>** Creates an *EasyCan* object. The object is templated with the CAN bus, receive buffer size, and transmit buffer size. Receive and transmit buffer sizes are defined in terms of the number of *CanMsg* data structures the buffer can hold.
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!).  Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+For Teensy 3.1, 3.2, and 3.5 the only CAN bus available is CAN0. For Teensy 3.6, CAN buses available are CAN0 and CAN1. For Teensy 4.0 and 4.1, CAN buses available are CAN1, CAN2, and CAN3. See the [Teensy pinout card](https://www.pjrc.com/teensy/pinout.html) for associating bus numbers with pins.
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+An example of instantiating an object for CAN bus 0 is:
 
-## Name
-Choose a self-explaining name for your project.
+```C++
+bfs::EasyCan<CAN0, 128, 128> can0;
+```
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+**bool Begin(const int32_t baud)** Initializes the CAN bus at the specified baud rate and will start receiving messages sent on the bus. Returns true on successfully initializing and configuring the bus.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+```C++
+can0.Begin(1000000);
+```
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+## Filtering
+After initialization, by default the object will begin receiving all messages on the bus. Filters can be configured to only receive selected messages. Up to 32 filters can be defined.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+**int8_t NUM_FILTERS() const** Returns the maximum number of filters that can be defined (i.e. 32)
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+**void FilterRejectAll()** Rejects all messages on the bus, this should be run before setting up filters to allow through messages.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+```C++
+can0.FilterRejectAll();
+```
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+**void FilterAcceptAll()** Accepts all messages on the bus.
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+```C++
+can0.FilterAcceptAll();
+```
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+**bool SetFilter(uint8_t filter, uint32_t id1, const FLEXCAN_IDE &ide)** Configures a filter to accept an individual CAN ID. Whether the CAN ID is an 11 bit STD ID or a 29 bit EXT ID should be specified. Returns true on successfully configuring the filter.
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+For example, to setup filter number 0 to accept a STD CAN ID of 0x10 would be:
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+```C++
+can0.SetFilter(0, 0x10, STD);
+```
 
-## License
-For open source projects, say how it is licensed.
+**bool SetFilterRange(uint8_t filter, uint32_t id1, uint32_t id2, const FLEXCAN_IDE &ide)** This method enables a range of filter IDs to be specified, from *id1* to *id2*. For example, to setup filter number 0 to accept STD CAN IDs of 1 to 3:
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+```C++
+can0.SetFilterRange(0, 1, 3, STD);
+```
+
+## Writing Messages
+
+**bool Write(const CanMsg &msg, int32_t timeout_duration_us, bool blocking)** Writes a message to the CAN bus with several options depending on the specified timeout duration (in us) and whether the method should be blocking (blocking = true) or non-blocking (blocking = false). The following logic table defines the behavior. Timeout duration is always from the current monotonic system time in us, i.e. a duration of 1000 is 1,000 microseconds from when the method was called.
+
+| Timeout Duration | Blocking | Behavior | Return value |
+| --- | --- | --- | --- |
+| Positive | true | Method blocks until the message is sent or the timeout expires | true if the message was sent |
+| Positive | false | The message is sent to the transmit FIFO buffer, when the message comes to the front of the buffer it is sent if the timeout hasn't expired, otherwise it is discarded. | true if there is space in the FIFO buffer |
+| Negative | true | Method blocks indefinitely until the message is sent | true |
+| Negative | false | The message is sent to the transmit FIFO buffer, when the message comes to the front of the buffer, it is sent | true if there is space in the FIFO buffer |
+| Zero | - | Method attempts to send the message immediately | true if the message is able to be immediately sent, otherwise false |
+
+```C++
+bfs::CanMsg msg;
+/* Blocking write, waiting up to 1ms to send */
+can0.Write(msg, 1000, true);
+/* Non blocking write, no timeout */
+can0.Write(msg, -1, false);
+```
+
+**bool tx_ready()** Returns true if the CAN bus is ready to immediately transmit a message.
+
+```C++
+/* Check if message can be sent immediately, and then send it */
+if (can0.tx_ready()) {
+   can0.write(msg, 0, true);
+}
+```
+
+**std::size_t available_for_write() const** Returns the current space in the transmit buffer available for storing transmit messages.
+
+```C++
+/* Check space available for FIFO */
+if (can0.available_for_write()) {
+   can0.Write(msg, 1000, false);
+}
+```
+
+## Reading Messages
+Interrupts automatically move received and filtered messages to a buffer. Methods are available for checking the number of messages in the buffer and reading messages off the buffer.
+
+**std::size_t available() const** Returns the number of messages currently in the receive buffer.
+
+```C++
+std::size_t req = can0.available();
+```
+
+**std::size_t Read(CanMsg * const data, const std::size_t len)** Moves messages from the receive buffer into an array pointed to by *data* up to length *len*. Returns the number of messages moved.
+
+```C++
+/* Buffer to work with CanMsg */
+std::array<bfs::CanMsg, 100> msgs;
+/* Requesting up to the buffer length, return the actual number copied */
+std::size_t msg_read = can0.Read(msgs.data(), 100);
+```

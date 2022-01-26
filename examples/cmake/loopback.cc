@@ -42,16 +42,28 @@ int main() {
   /* Begin the CAN */
   can0.Begin(1000000);
   can1.Begin(1000000);
+  can1.FilterRejectAll();
+  // can1.SetFilter(0, 1, STD);
+  // can1.SetFilter(1, 2, STD);
+  // can1.SetFilter(2, 3, STD);
+  // can1.SetFilter(3, 4, STD);
+  bool status = can1.SetFilter(0, 0x0000, 0x0007, STD);
+  // Serial.println(status);
+  // can1.SetFilter(0, 2, EXT);
+  // can1.SetFilter(0, 3, EXT);
+  // can1.SetFilter(0, 4, EXT);
+  // can1.SetFilter(0, 5, EXT);
+  // can1.FilterAcceptAll();
   /* Write a message */
   int t1, t2;
   for (int i = 0; i < 24; i++) {
-    t1 = micros();
-    can0.Write(msg, -1, true);
-    t2 = micros();
-    Serial.println(t2 - t1);
+    msg.id = i;
+    can0.Write(msg, -1, false);
+    if (i < 10) {
+      can1.Write(msg, -1, false);
+    }
   }
   delay(10);
   Serial.println(can1.available());
-
 }
 

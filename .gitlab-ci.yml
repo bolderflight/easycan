@@ -1,0 +1,9 @@
+stages:
+  - lint
+
+Lint:
+  stage: lint
+  tags:
+    - bfs
+  script: 
+    - cpplint --verbose=0 src/easycan.h
