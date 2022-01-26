@@ -196,3 +196,14 @@ std::array<bfs::CanMsg, 100> msgs;
 /* Requesting up to the buffer length, return the actual number copied */
 std::size_t msg_read = can0.Read(msgs.data(), 100);
 ```
+
+**optional<CanMsg> Read()** Returns a single message from the receive buffer using an interface similar to [std::optional](https://en.cppreference.com/w/cpp/utility/optional). This method would not return a value if there are none in the receive buffer (i.e. available() returns zero).
+
+```C++
+bfs::optional<bfs::CanMsg> ret = can0.Read();
+/* Check that a value was returned */
+if (ret) {
+   /* Print the CAN ID from the returned value */
+   Serial.println(ret.value().id);
+}
+```
