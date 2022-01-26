@@ -1,5 +1,7 @@
 EasyCan	KEYWORD1
 Begin	KEYWORD2
+SetRx	KEYWORD2
+SetTx	KEYWORD2
 FilterRejectAll	KEYWORD2
 FilterAcceptAll	KEYWORD2
 SetFilter	KEYWORD2
